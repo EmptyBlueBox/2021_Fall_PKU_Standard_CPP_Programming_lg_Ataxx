@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <ctime>
 using namespace std;
-int start = clock();//卡时间
+int start;//卡时间
 int chsBoard[8][8] = { 0 };//黑棋先行，黑棋1，白棋-1
 int chess[3][8][8] = { 0 };//黑棋2，白棋1
 int tempchsBoard[10][8][8] = { 0 };//黑棋先行，黑棋1，白棋-1
@@ -44,13 +44,12 @@ void cpy(int step)
 			tempchess[step][2][i][j] = chess[2][i][j];
 		}
 	}
-
+	return;
 }
 //重置棋盘与棋子
 void rcpy(int step)
 {
 	int i, j;
-
 	for (i = 0; i <= 7; i++)
 	{
 		for (j = 0; j <= 7; j++)
@@ -60,6 +59,7 @@ void rcpy(int step)
 			chess[2][i][j] = tempchess[step][2][i][j];
 		}
 	}
+	return;
 }
 //输入玩家操作的棋子坐标,目的地，棋子颜色  更改棋盘与棋子的位置记录
 void move(int m, int n, int x, int y, int col)
@@ -125,6 +125,7 @@ void move(int m, int n, int x, int y, int col)
 			}
 		}
 	}
+	return;
 }
 /*************************************************************************************************************************************/
 //AI的函数
@@ -428,4 +429,6 @@ int main()
 	{
 		aiFindNextStep(1);
 	}
+
+	return 0;
 }
