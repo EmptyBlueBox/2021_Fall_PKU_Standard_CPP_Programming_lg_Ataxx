@@ -1,0 +1,431 @@
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#include <algorithm>
+#include <ctime>
+using namespace std;
+int start = clock();//卡时间
+int chsBoard[8][8] = { 0 };//黑棋先行，黑棋1，白棋-1
+int chess[3][8][8] = { 0 };//黑棋2，白棋1
+int tempchsBoard[10][8][8] = { 0 };//黑棋先行，黑棋1，白棋-1
+int tempchess[10][3][8][8] = { 0 };//黑棋2，白棋1
+int col = 1;
+int userCol;
+int cnt1 = 0; int cnt2 = 0;
+struct better
+{
+	int x1;
+	int y1;
+	int x2;
+	int y2;
+	double value;
+}
+candidate[30];
+
+bool cmp(better a, better b)
+{
+	if (a.value > b.value)
+		return true;
+	else
+		return false;
+}
+
+//复制棋盘与棋子
+void cpy(int step)
+{
+	int i, j;
+
+	for (i = 0; i <= 7; i++)
+	{
+		for (j = 0; j <= 7; j++)
+		{
+			tempchsBoard[step][i][j] = chsBoard[i][j];
+			tempchess[step][0][i][j] = chess[0][i][j];
+			tempchess[step][2][i][j] = chess[2][i][j];
+		}
+	}
+
+}
+//重置棋盘与棋子
+void rcpy(int step)
+{
+	int i, j;
+
+	for (i = 0; i <= 7; i++)
+	{
+		for (j = 0; j <= 7; j++)
+		{
+			chsBoard[i][j] = tempchsBoard[step][i][j];
+			chess[0][i][j] = tempchess[step][0][i][j];
+			chess[2][i][j] = tempchess[step][2][i][j];
+		}
+	}
+}
+//输入玩家操作的棋子坐标,目的地，棋子颜色  更改棋盘与棋子的位置记录
+void move(int m, int n, int x, int y, int col)
+{
+	int i, j;
+
+	if (abs(m - x) <= 1 && abs(n - y) <= 1)
+	{
+		chsBoard[x][y] = col;
+		chess[col + 1][x][y] = true;
+		chess[col + 1][0][0]++;
+
+		//改变周围棋的颜色
+		for (i = x - 1; i <= x + 1; i++)
+		{
+			for (j = y - 1; j <= y + 1; j++)
+			{
+				if (i <= 0 || i >= 8 || j <= 0 || j >= 8)
+				{
+					continue;
+				}
+				if (i == x && j == y)
+					continue;
+				if (chsBoard[i][j] == -1 * col)
+				{
+					chsBoard[i][j] = col;
+					chess[col + 1][i][j] = true;
+					chess[1 + col][0][0]++;
+					chess[1 - col][i][j] = false;
+					chess[1 - col][0][0]--;
+				}
+			}
+		}
+	}
+	else
+	{
+		chsBoard[x][y] = col;
+		chsBoard[m][n] = 0;
+		chess[col + 1][x][y] = true;
+		chess[col + 1][0][0]++;
+		chess[col + 1][m][n] = false;
+		chess[col + 1][0][0]--;
+
+		//改变周围棋的颜色
+		for (i = x - 1; i <= x + 1; i++)
+		{
+			for (j = y - 1; j <= y + 1; j++)
+			{
+				if (i <= 0 || i >= 8 || j <= 0 || j >= 8)
+				{
+					continue;
+				}
+				if (i == x && j == y)
+					continue;
+				if (chsBoard[i][j] == -1 * col)
+				{
+					chsBoard[i][j] = col;
+					chess[1 + col][i][j] = true;
+					chess[1 + col][0][0]++;
+					chess[1 - col][i][j] = false;
+					chess[1 - col][0][0]--;
+				}
+			}
+		}
+	}
+}
+/*************************************************************************************************************************************/
+//AI的函数
+int maxDepth;//调节难度
+int maxcan;
+double weight[8][8] = { { 1.5,1.5,1.5,1.5,1.5,1.5,1.5,1.5, },
+{ 1.5,1,0.965051,0.849347,0.803681,0.779659,0.789668,1, },
+{ 1.5,0.965051,0.87366,0.835621,0.743914,0.715635,0.719026,0.789668, },
+{ 1.5,0.849347,0.835621,0.788361,0.701912,0.677423,0.715635,0.779659, },
+{ 1.5,0.803681,0.743914,0.701912,0.70752,0.701912,0.743914,0.803681, },
+{ 1.5,0.779659,0.715635,0.677423,0.701912,0.788361,0.835621,0.849347, },
+{ 1.5,0.789667,0.719026,0.715635,0.743914,0.835621,0.87366,0.965051, },
+{ 1.5,1,0.789668,0.779659,0.803681,0.849347,0.965051,1, } };
+
+//某一个棋局时某种颜色棋的获益
+double w(int col)
+{
+	int i, j;
+
+	double win = 0;
+	for (i = 1; i <= 7; i++)
+	{
+		for (j = 1; j <= 7; j++)
+		{
+			if (chess[col + 1][i][j] == true)
+			{
+				win += weight[i][j];
+			}
+		}
+	}
+	if (chess[col + 1][0][0] >= 25)
+		win += 20;
+	if (chess[col + 1][0][0] + chess[-1 * col + 1][0][0] == 49)
+	{
+		if (chess[col + 1][0][0] >= 25)
+			win += 1000;
+	}
+	return win;
+}
+
+int flag = 1;
+//返回电脑的最佳收益(tempCol为userCol时找最小，tempCol为computerCol时找最大）
+double search(int tempCol, int depth, double alpha, double beta)
+{
+	int i, j, k, l;//循环变量
+
+	if (depth > maxDepth)//边界条件
+	{
+		return w(-1 * userCol) - w(userCol);
+		//添加更好的估值，黑白均估值
+	}
+	if (depth == maxDepth - 2 && flag == 1)//卡时间，当要超时就降低搜索深度
+	{
+		if (clock() - start >= CLOCKS_PER_SEC * 0.75)
+		{
+			maxDepth = 3;
+			flag = 0;
+		}
+	}
+
+	double temp;
+	if (tempCol == -1 * userCol)//电脑选最大的
+	{
+		alpha = -100000;//不要用一开始传下来的alpha！！！！！！！
+		for (i = 1; i <= 7; i++)
+		{
+			for (j = 1; j <= 7; j++)
+			{
+				if (chess[tempCol + 1][i][j] == true)
+				{
+					for (k = i - 2; k <= i + 2; k++)
+					{
+						for (l = j - 2; l <= j + 2; l++)
+						{
+							if (k <= 0 || k >= 8 || l <= 0 || l >= 8)
+								continue;
+							if (k == i && l == j)
+								continue;
+							if (chsBoard[k][l] != 0)
+								continue;
+
+							cpy(depth);
+							move(i, j, k, l, tempCol);
+							temp = search(-1 * tempCol, depth + 1, alpha, beta);
+							rcpy(depth);
+							if (temp > alpha)
+								alpha = temp;
+							if (alpha > beta)
+							{
+								cnt1++;
+								return alpha;
+							}
+						}
+					}
+				}
+			}
+		}
+		return alpha;
+	}
+	else if (tempCol == userCol)
+	{
+		beta = 100000;
+		for (i = 1; i <= 7; i++)
+		{
+			for (j = 1; j <= 7; j++)
+			{
+				if (chess[tempCol + 1][i][j] == true)
+				{
+					for (k = i - 2; k <= i + 2; k++)
+					{
+						for (l = j - 2; l <= j + 2; l++)
+						{
+							if (k <= 0 || k >= 8 || l <= 0 || l >= 8)
+								continue;
+							if (k == i && l == j)
+								continue;
+							if (chsBoard[k][l] != 0)
+								continue;
+							cpy(depth);
+							move(i, j, k, l, tempCol);
+							temp = search(-1 * tempCol, depth + 1, alpha, beta);
+							rcpy(depth);
+							if (temp < beta)
+								beta = temp;
+							if (beta < alpha)
+							{
+								cnt2++;
+								return beta;
+							}
+						}
+					}
+				}
+			}
+		}
+		return beta;
+	}
+}
+
+//ai搜索某种颜色下一步最佳方案，下出来并提示位置
+
+void aiFindNextStep(int computerCol)
+{
+	int i, j, k, l;//循环变量
+
+	int bestm = 0, bestn = 0, bestx = 0, besty = 0;//最佳的下棋方法，从(m, n)到(x, y)
+	double temp;
+	double alpha = -100000, beta = 100000;
+	//循环col所有棋子的每一种可能下法
+	//可以一步贪心取前排序再递归，提高剪枝效率
+	int cnt = 0;
+	for (i = 1; i <= 7; i++)
+	{
+		for (j = 1; j <= 7; j++)
+		{
+			if (chess[computerCol + 1][i][j] == true)
+			{
+				for (k = i - 2; k <= i + 2; k++)
+				{
+					for (l = j - 2; l <= j + 2; l++)
+					{
+						if (k <= 0 || k >= 8 || l <= 0 || l >= 8)
+							continue;
+						if (k == i && l == j)
+							continue;
+						if (chsBoard[k][l] != 0)
+							continue;
+
+						cpy(0);//存储棋盘
+						move(i, j, k, l, computerCol);
+						temp = w(-userCol) - w(userCol);
+						rcpy(0);//恢复状态
+
+						candidate[cnt].value = temp;
+						candidate[cnt].x1 = i;
+						candidate[cnt].y1 = j;
+						candidate[cnt].x2 = k;
+						candidate[cnt].y2 = l;
+						cnt++;
+					}
+				}
+			}
+		}
+	}
+	cnt--;
+	sort(candidate, candidate + cnt, cmp);
+
+	for (i = 0; i <= maxcan - 1; i++)
+	{
+
+		if (candidate[i].x1 <= 0 || candidate[i].x1 >= 8)
+			continue;
+		if (candidate[i].x2 <= 0 || candidate[i].x2 >= 8)
+			continue;
+		if (candidate[i].y1 <= 0 || candidate[i].y1 >= 8)
+			continue;
+		if (candidate[i].y2 <= 0 || candidate[i].y2 >= 8)
+			continue;
+
+		cpy(0);//存储棋盘
+		move(candidate[i].x1, candidate[i].y1, candidate[i].x2, candidate[i].y2, computerCol);//深搜转移状态
+		temp = search(-1 * computerCol, 1, alpha, beta);//找这里的最大beta
+		rcpy(0);//恢复状态
+		if (temp == -100000)
+		{
+			goto flag;
+		}
+		if (temp > alpha)
+		{
+			alpha = temp;
+		flag: {};
+			bestm = candidate[i].x1;
+			bestn = candidate[i].y1;
+			bestx = candidate[i].x2;
+			besty = candidate[i].y2;
+		}
+	}
+	cout << bestm - 1 << " " << bestn - 1 << " " << bestx - 1 << " " << besty - 1 << endl;
+	cout << cnt1 << " " << cnt2 << " " << maxDepth << " " << clock() * 1.0 / CLOCKS_PER_SEC;
+	return;
+}
+/*************************************************************************************************************************************/
+
+int main()
+{
+	maxDepth = 4;
+	maxcan = 25;
+	memset(candidate, -1, sizeof(candidate));
+	//初始化棋盘
+	chsBoard[1][1] = 1;
+	chsBoard[7][7] = 1;
+	chsBoard[1][7] = -1;
+	chsBoard[7][1] = -1;
+	chess[0][1][7] = true;
+	chess[0][7][1] = true;
+	chess[2][1][1] = true;
+	chess[2][7][7] = true;
+	chess[0][0][0] = 2;
+	chess[2][0][0] = 2;
+
+	userCol = 1;
+	col = 1;
+	int time;
+	int m, n, x, y;
+	cin >> time;
+	start = clock();
+	if (time <= 10)//开局不用算很多
+	{
+		maxDepth = 4;
+		maxcan = 18;
+	}
+	if (chess[col + 1][0][0] + chess[-col][0][0] >= 45)//残局多算
+	{
+		maxDepth = 4;
+		flag = 0;
+	}
+
+	userCol = 1; // 第一回合收到坐标是-1, -1，说明我是黑方
+	for (int i = 0; i < time - 1; i++)
+	{
+		// 根据这些输入输出逐渐恢复状态到当前回合
+		cin >> m >> n >> x >> y;
+		if (x >= 0)
+		{
+			m++;
+			n++;
+			x++;
+			y++;
+			move(m, n, x, y, userCol); // 模拟对方落子
+		}
+		else
+		{
+			userCol = -1;
+		}
+		cin >> m >> n >> x >> y;
+		m++;
+		n++;
+		x++;
+		y++;
+		if (x >= 0)
+			move(m, n, x, y, -1 * userCol); // 模拟己方落子
+	}
+	cin >> m >> n >> x >> y;
+	if (m >= 0)
+	{
+		m++;
+		n++;
+		x++;
+		y++;
+		move(m, n, x, y, userCol); // 模拟对方落子
+	}
+	else
+		userCol = -1;
+
+
+	if (userCol == 1)//玩家拿黑子
+	{
+		aiFindNextStep(-1);
+	}
+
+	else if (userCol == -1)//玩家拿白子
+	{
+		aiFindNextStep(1);
+	}
+}
