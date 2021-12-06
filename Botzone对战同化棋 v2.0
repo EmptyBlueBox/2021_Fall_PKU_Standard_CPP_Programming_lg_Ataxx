@@ -179,7 +179,7 @@ double search(int tempCol, int depth, double alpha, double beta)
 	}
 	if (depth == maxDepth - 2 && flag == 1)//卡时间，当要超时就降低搜索深度
 	{
-		if (clock() - start >= CLOCKS_PER_SEC * 0.75)
+		if (clock() - start >= CLOCKS_PER_SEC * 0.90)
 		{
 			maxDepth = 3;
 			flag = 0;
@@ -343,7 +343,7 @@ void aiFindNextStep(int computerCol)
 		}
 	}
 	cout << bestm - 1 << " " << bestn - 1 << " " << bestx - 1 << " " << besty - 1 << endl;
-	cout << cnt1 << " " << cnt2 << " " << maxDepth << " " << clock() * 1.0 / CLOCKS_PER_SEC;
+	cout << cnt1 << " " << cnt2 << " " << maxDepth << " " << maxcan << " " << clock() * 1.0 / CLOCKS_PER_SEC;
 	return;
 }
 /*************************************************************************************************************************************/
