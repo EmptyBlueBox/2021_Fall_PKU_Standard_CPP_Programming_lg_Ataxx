@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <ctime>
 using namespace std;
-int start = clock();//卡时间
+int start;//卡时间
 int chsBoard[8][8] = { 0 };//黑棋先行，黑棋1，白棋-1
 int chess[3][8][8] = { 0 };//黑棋2，白棋1
 int tempchsBoard[10][8][8] = { 0 };//黑棋先行，黑棋1，白棋-1
@@ -20,7 +20,7 @@ struct better
 	int y2;
 	double value;
 }
-candidate[60];
+candidate[30];
 
 bool cmp(better a, better b)
 {
@@ -44,13 +44,12 @@ void cpy(int step)
 			tempchess[step][2][i][j] = chess[2][i][j];
 		}
 	}
-
+	return;
 }
 //重置棋盘与棋子
 void rcpy(int step)
 {
 	int i, j;
-
 	for (i = 0; i <= 7; i++)
 	{
 		for (j = 0; j <= 7; j++)
@@ -60,6 +59,7 @@ void rcpy(int step)
 			chess[2][i][j] = tempchess[step][2][i][j];
 		}
 	}
+	return;
 }
 //输入玩家操作的棋子坐标,目的地，棋子颜色  更改棋盘与棋子的位置记录
 void move(int m, int n, int x, int y, int col)
@@ -125,6 +125,7 @@ void move(int m, int n, int x, int y, int col)
 			}
 		}
 	}
+	return;
 }
 /*************************************************************************************************************************************/
 //AI的函数
@@ -157,6 +158,11 @@ double w(int col)
 	}
 	if (chess[col + 1][0][0] >= 25)
 		win += 20;
+	if (chess[col + 1][0][0] + chess[-1 * col + 1][0][0] == 49)
+	{
+		if (chess[col + 1][0][0] >= 25)
+			win += 1000;
+	}
 	return win;
 }
 
@@ -173,7 +179,7 @@ double search(int tempCol, int depth, double alpha, double beta)
 	}
 	if (depth == maxDepth - 2 && flag == 1)//卡时间，当要超时就降低搜索深度
 	{
-		if (clock() - start >= CLOCKS_PER_SEC * 0.80)
+		if (clock() - start >= CLOCKS_PER_SEC * 0.75)
 		{
 			maxDepth = 3;
 			flag = 0;
@@ -289,7 +295,7 @@ void aiFindNextStep(int computerCol)
 
 						cpy(0);//存储棋盘
 						move(i, j, k, l, computerCol);
-						temp = w(-1 * userCol) - w(userCol);
+						temp = w(-userCol) - w(userCol);
 						rcpy(0);//恢复状态
 
 						candidate[cnt].value = temp;
@@ -317,7 +323,7 @@ void aiFindNextStep(int computerCol)
 			continue;
 		if (candidate[i].y2 <= 0 || candidate[i].y2 >= 8)
 			continue;
-		
+
 		cpy(0);//存储棋盘
 		move(candidate[i].x1, candidate[i].y1, candidate[i].x2, candidate[i].y2, computerCol);//深搜转移状态
 		temp = search(-1 * computerCol, 1, alpha, beta);//找这里的最大beta
@@ -364,6 +370,12 @@ int main()
 	int time;
 	int m, n, x, y;
 	cin >> time;
+	start = clock();
+	if (time <= 10)//开局不用算很多
+	{
+		maxDepth = 4;
+		maxcan = 15;
+	}
 	userCol = 1; // 第一回合收到坐标是-1, -1，说明我是黑方
 	for (int i = 0; i < time - 1; i++)
 	{
@@ -411,4 +423,6 @@ int main()
 	{
 		aiFindNextStep(1);
 	}
+
+	return 0;
 }
