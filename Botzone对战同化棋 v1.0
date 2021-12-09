@@ -113,18 +113,55 @@ void move(int m, int n, int x, int y, int col)
 		}
 	}
 }
+//检测某个位置的棋子是否可以移动
+bool oneCanMove(int x, int y)
+{
+	int i, j;
+	for (i = x - 2; i <= x + 2; i++)
+	{
+		for (j = y - 2; j <= y + 2; j++)
+		{
+			//先排除非法棋步
+			if (i <= 0 || i >= 8 || j <= 0 || j >= 8)
+				continue;
+			if (x == i && y == j)
+				continue;
+
+
+			if (chsBoard[i][j] == 0)
+				return true;
+		}
+	}
+	return false;
+}
+//检测某个棋盘下，某种颜色棋子是否可以移动
+bool canMove(int col)
+{
+	int i, j, k, l;
+	for (i = 1; i <= 7; i++)
+	{
+		for (j = 1; j <= 7; j++)
+		{
+			if (chess[col + 1][i][j] && oneCanMove(i, j))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
 /*************************************************************************************************************************************/
 //AI的函数
 int maxDepth;//调节难度
 
-double weight[8][8] = { { 1.5,1.5,1.5,1.5,1.5,1.5,1.5,1.5, },
-{ 1.5,1,0.965051,0.849347,0.803681,0.779659,0.789668,1, },
-{ 1.5,0.965051,0.87366,0.835621,0.743914,0.715635,0.719026,0.789668, },
-{ 1.5,0.849347,0.835621,0.788361,0.701912,0.677423,0.715635,0.779659, },
-{ 1.5,0.803681,0.743914,0.701912,0.70752,0.701912,0.743914,0.803681, },
-{ 1.5,0.779659,0.715635,0.677423,0.701912,0.788361,0.835621,0.849347, },
-{ 1.5,0.789667,0.719026,0.715635,0.743914,0.835621,0.87366,0.965051, },
-{ 1.5,1,0.789668,0.779659,0.803681,0.849347,0.965051,1, } };
+double weight[8][8] = { { 1,1,1,1,1,1,1,1, },
+{ 1,0.99,0.965051,0.849347,0.803681,0.779659,0.789668,0.99, },
+{ 1,0.965051,0.87366,0.835621,0.743914,0.715635,0.719026,0.789668, },
+{ 1,0.849347,0.835621,0.788361,0.701912,0.677423,0.715635,0.779659, },
+{ 1,0.803681,0.743914,0.701912,0.70752,0.701912,0.743914,0.803681, },
+{ 1,0.779659,0.715635,0.677423,0.701912,0.788361,0.835621,0.849347, },
+{ 1,0.789667,0.719026,0.715635,0.743914,0.835621,0.87366,0.965051, },
+{ 1,0.99,0.789668,0.779659,0.803681,0.849347,0.965051,0.99, } };
 
 //某一个棋局时某种颜色棋的获益
 double w(int col)
@@ -140,11 +177,23 @@ double w(int col)
 			{
 				win += weight[i][j];
 			}
+			if (chess[-col + 1][i][j] == true)
+			{
+				win -= weight[i][j];
+			}
 		}
 	}
 	if (chess[col + 1][0][0] >= 25)
 		win += 20;
-
+	if (chess[-col + 1][0][0] >= 25)
+		win -= 20;
+	if (chess[col + 1][0][0] + chess[-1 * col + 1][0][0] == 49)
+	{
+		if (chess[col + 1][0][0] >= 25)
+			win += 1000;
+		if (chess[-col + 1][0][0] >= 25)
+			win -= 1000;
+	}
 	return win;
 }
 
@@ -154,7 +203,7 @@ double search(int tempCol, int depth, double alpha, double beta)
 	int i, j, k, l;//循环变量
 
 	if (depth > maxDepth)//边界条件
-		return w(-1 * userCol) - w(userCol);
+		return w(-userCol);
 
 	if (depth == maxDepth - 2)//卡时间，当要超时就降低搜索深度
 	{
@@ -162,6 +211,13 @@ double search(int tempCol, int depth, double alpha, double beta)
 		{
 			maxDepth = 3;
 		}
+	}
+	//特判棋局终止
+	if (!canMove(tempCol))
+	{
+		if (!canMove(-tempCol))
+			return w(-userCol);
+		return search(-tempCol, depth + 1, alpha, beta);
 	}
 
 	double temp;
@@ -187,7 +243,7 @@ double search(int tempCol, int depth, double alpha, double beta)
 
 							cpy(depth);
 							move(i, j, k, l, tempCol);
-							temp = search(-1 * tempCol, depth + 1, alpha, beta);
+							temp = search(-tempCol, depth + 1, alpha, beta);
 							rcpy(depth);
 							if (temp > alpha)
 								alpha = temp;
@@ -224,7 +280,7 @@ double search(int tempCol, int depth, double alpha, double beta)
 								continue;
 							cpy(depth);
 							move(i, j, k, l, tempCol);
-							temp = search(-1 * tempCol, depth + 1, alpha, beta);
+							temp = search(-tempCol, depth + 1, alpha, beta);
 							rcpy(depth);
 							if (temp < beta)
 								beta = temp;
@@ -270,7 +326,7 @@ void aiFindNextStep(int computerCol)
 
 						cpy(0);//存储棋盘
 						move(i, j, k, l, computerCol);//深搜转移状态
-						temp = search(-1 * computerCol, 1, alpha, beta);//找这里的最大beta
+						temp = search(-computerCol, 1, alpha, beta);//找这里的最大beta
 						rcpy(0);//恢复状态
 						if (temp == -100000)
 						{
