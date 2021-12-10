@@ -207,7 +207,7 @@ double search(int tempCol, int depth, double alpha, double beta)
 
 	if (depth == maxDepth - 2)//卡时间，当要超时就降低搜索深度
 	{
-		if (clock() - start >= CLOCKS_PER_SEC * 0.85)
+		if (clock() - start >= CLOCKS_PER_SEC * 0.95)
 		{
 			maxDepth = 3;
 		}
