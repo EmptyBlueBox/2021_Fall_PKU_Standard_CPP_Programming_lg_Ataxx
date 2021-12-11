@@ -207,15 +207,18 @@ double search(int tempCol, int depth, double alpha, double beta)
 
 
 	//卡时间，要超时就降低搜索深度
+	if (depth == maxDepth - 1 && maxDepth == 2)
+		if (clock() - start >= CLOCKS_PER_SEC * 0.995)
+			maxDepth = 1;
 	if (depth == maxDepth - 1 && maxDepth == 3)
-		if (clock() - start >= CLOCKS_PER_SEC * 0.975)
+		if (clock() - start >= CLOCKS_PER_SEC * 0.95)
 			maxDepth = 2;
 	if (depth == maxDepth - 2 && maxDepth == 4)
 		if (clock() - start >= CLOCKS_PER_SEC * 0.90)
 			maxDepth = 3;
 	if (depth == maxDepth - 2 && maxDepth >= 5)
-		if (clock() - start >= CLOCKS_PER_SEC * 0.80)
-			maxDepth = 4;
+		if (clock() - start >= CLOCKS_PER_SEC * 0.85)
+			--maxDepth;
 
 	//---------------------------------------------------------
 
@@ -356,7 +359,7 @@ void aiFindNextStep(int computerCol)
 	}
 	move(bestm, bestn, bestx, besty, computerCol);
 	cout << bestm - 1 << " " << bestn - 1 << " " << bestx - 1 << " " << besty - 1 << endl;
-	cout << chess[0][0][0] << " " << chess[2][0][0] << " " << cnt1 << " " << cnt2 << " " << maxDepth << " " << clock() * 1.00 / CLOCKS_PER_SEC;
+	cout << chess[0][0][0] << " " << chess[2][0][0] << " " << cnt1 << " " << cnt2 << " " << maxDepth << " " << clock() * 1.0000 / CLOCKS_PER_SEC;
 	return;
 }
 /*************************************************************************************************************************************/
@@ -422,8 +425,8 @@ int main()
 	//36个子之前用5步搜索
 	if (chess[0][0][0] + chess[2][0][0] <= 36)
 		maxDepth = 3;
-	//45个子之后用8步搜索
-	if (chess[0][0][0] + chess[2][0][0] >= 45)
+	//44个子之后用8步搜索
+	if (chess[0][0][0] + chess[2][0][0] >= 44)
 		maxDepth = 6;
 
 	//---------------------------------------------------------
