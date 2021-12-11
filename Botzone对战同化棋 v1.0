@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstring>
 #include <ctime>
+#include <random>
 using namespace std;
 
 int start = clock();//卡时间
@@ -190,6 +191,7 @@ double w(int col)
 		if (chess[-col + 1][0][0] >= 25)
 			win -= 1000;
 	}
+	win += rand() % 3;
 	return win;
 }
 
@@ -205,13 +207,13 @@ double search(int tempCol, int depth, double alpha, double beta)
 
 
 	//卡时间，要超时就降低搜索深度
-	if (depth == maxDepth - 2 && maxDepth == 3)
-		if (clock() - start >= CLOCKS_PER_SEC * 0.98)
+	if (depth == maxDepth - 1 && maxDepth == 3)
+		if (clock() - start >= CLOCKS_PER_SEC * 0.975)
 			maxDepth = 2;
 	if (depth == maxDepth - 2 && maxDepth == 4)
 		if (clock() - start >= CLOCKS_PER_SEC * 0.90)
 			maxDepth = 3;
-	if (depth == maxDepth - 2 && maxDepth == 5)
+	if (depth == maxDepth - 2 && maxDepth >= 5)
 		if (clock() - start >= CLOCKS_PER_SEC * 0.80)
 			maxDepth = 4;
 
@@ -420,9 +422,9 @@ int main()
 	//36个子之前用5步搜索
 	if (chess[0][0][0] + chess[2][0][0] <= 36)
 		maxDepth = 3;
-	//45个子之后用7步搜索
+	//45个子之后用8步搜索
 	if (chess[0][0][0] + chess[2][0][0] >= 45)
-		maxDepth = 5;
+		maxDepth = 6;
 
 	//---------------------------------------------------------
 
