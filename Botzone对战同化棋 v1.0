@@ -22,7 +22,6 @@ int abs(int p)
 void cpy(int step)
 {
 	int i, j;
-
 	for (i = 0; i <= 7; i++)
 	{
 		for (j = 0; j <= 7; j++)
@@ -32,13 +31,11 @@ void cpy(int step)
 			tempchess[step][2][i][j] = chess[2][i][j];
 		}
 	}
-
 }
 //重置棋盘与棋子
 void rcpy(int step)
 {
 	int i, j;
-
 	for (i = 0; i <= 7; i++)
 	{
 		for (j = 0; j <= 7; j++)
@@ -90,7 +87,6 @@ void move(int m, int n, int x, int y, int col)
 		chess[col + 1][0][0]++;
 		chess[col + 1][m][n] = false;
 		chess[col + 1][0][0]--;
-
 		//改变周围棋的颜色
 		for (i = x - 1; i <= x + 1; i++)
 		{
@@ -128,7 +124,6 @@ bool oneCanMove(int x, int y)
 			if (x == i && y == j)
 				continue;
 
-
 			if (chsBoard[i][j] == 0)
 				return true;
 		}
@@ -138,7 +133,7 @@ bool oneCanMove(int x, int y)
 //检测某个棋盘下，某种颜色棋子是否可以移动
 bool canMove(int col)
 {
-	int i, j, k, l;
+	int i, j;
 	for (i = 1; i <= 7; i++)
 	{
 		for (j = 1; j <= 7; j++)
@@ -207,11 +202,11 @@ double search(int tempCol, int depth, double alpha, double beta)
 		return w(-userCol);
 
 	//---------------------------------------------------------
-	
+
 
 	//卡时间，要超时就降低搜索深度
 	if (depth == maxDepth - 2 && maxDepth == 3)
-		if (clock() - start >= CLOCKS_PER_SEC * 0.99)
+		if (clock() - start >= CLOCKS_PER_SEC * 0.98)
 			maxDepth = 2;
 	if (depth == maxDepth - 2 && maxDepth == 4)
 		if (clock() - start >= CLOCKS_PER_SEC * 0.90)
@@ -221,7 +216,7 @@ double search(int tempCol, int depth, double alpha, double beta)
 			maxDepth = 4;
 
 	//---------------------------------------------------------
-	
+
 
 	//特判棋局终止
 	if (!canMove(tempCol))
