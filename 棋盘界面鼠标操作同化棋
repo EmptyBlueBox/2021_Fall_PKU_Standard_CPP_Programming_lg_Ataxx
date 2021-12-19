@@ -406,6 +406,10 @@ flagToWhere: {};
 		cout << "游戏已保存" << endl;
 		goto flagToWhere;
 	}
+	if (chsBoard[x][y] == col)
+	{
+		return x * -10 - y;
+	}
 	if (!valid(m, n, x, y))//判断有无玩家的棋子,是否超出范围2
 	{
 		system("cls");
@@ -414,8 +418,6 @@ flagToWhere: {};
 		goto flagToWhere;
 	}
 
-	system("cls");
-	plot();
 	return x * 10 + y;//十位是行数，个位是列数
 }
 
@@ -686,6 +688,7 @@ void singleMatch(int userCol)//col总是从1开始
 		{
 			if (col == 1 && judgeAll(1) == true)
 			{
+			chooseSelect1:;
 				whoIsNext();
 				temp = select(userCol);
 				m = temp / 10;
@@ -697,6 +700,11 @@ void singleMatch(int userCol)//col总是从1开始
 				whoIsNext();
 
 				temp = towhere(m, n);
+				if (temp < 0)
+				{
+					chsBoard[m][n] /= 2;//将空心恢复
+					goto chooseSelect1;
+				}
 				chsBoard[m][n] /= 2;//将空心恢复
 				x = temp / 10;
 				y = temp % 10;
@@ -743,6 +751,7 @@ void singleMatch(int userCol)//col总是从1开始
 			//玩家下白子
 			if (col == -1 && judgeAll(-1) == true)
 			{
+			chooseSelect2:;
 				whoIsNext();
 				temp = select(userCol);
 				m = temp / 10;
@@ -754,6 +763,11 @@ void singleMatch(int userCol)//col总是从1开始
 				whoIsNext();
 
 				temp = towhere(m, n);
+				if (temp < 0)
+				{
+					chsBoard[m][n] /= 2;//将空心恢复
+					goto chooseSelect2;
+				}
 				chsBoard[m][n] /= 2;//将空心恢复
 				x = temp / 10;
 				y = temp % 10;
