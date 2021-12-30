@@ -4,12 +4,13 @@
 #include <random>
 using namespace std;
 
-int start = clock();//卡时间
-int chsBoard[8][8] = { 0 };//黑棋先行，黑棋1，白棋-1;chessBoard[0][0]是白棋个数，chess[0][2]是黑棋个数
-int tempchsBoard[10][8][8] = { 0 };//黑棋先行，黑棋1，白棋-1
-int col = 1;
-int userCol;
+short start = clock();//卡时间
+short chsBoard[8][8] = { 0 };//黑棋先行，黑棋1，白棋-1;chessBoard[0][0]是白棋个数，chess[0][2]是黑棋个数
+short tempchsBoard[10][8][8] = { 0 };//黑棋先行，黑棋1，白棋-1
+short col = 1;
+short userCol;
 int cnt1 = 0; int cnt2 = 0;
+int cnt = 0;
 //复制棋盘与棋子
 int abs(int p)
 {
@@ -96,13 +97,13 @@ bool canMove(int col)
 int maxDepth;//调节难度
 
 double weight[8][8] = { { 1,1,1,1,1,1,1,1, },
-{ 1,0.99,0.965051,0.849347,0.803681,0.779659,0.789668,0.99, },
-{ 1,0.965051,0.87366,0.835621,0.743914,0.715635,0.719026,0.789668, },
-{ 1,0.849347,0.835621,0.788361,0.701912,0.677423,0.715635,0.779659, },
-{ 1,0.803681,0.743914,0.701912,0.70752,0.701912,0.743914,0.803681, },
-{ 1,0.779659,0.715635,0.677423,0.701912,0.788361,0.835621,0.849347, },
-{ 1,0.789667,0.719026,0.715635,0.743914,0.835621,0.87366,0.965051, },
-{ 1,0.99,0.789668,0.779659,0.803681,0.849347,0.965051,0.99, } };
+{ 1,0.99,0.965051,0.849347,0.803681,0.779659,0.965051,0.99, },
+{ 1,0.96505,0.87366,0.83562,0.74391,0.83562,0.87366,0.96505, },
+{ 1,0.84934,0.83562,0.78836,0.70191,0.78836,0.83562,0.84934, },
+{ 1,0.80368,0.74391,0.70191,0.70752,0.70191,0.74391,0.80368, },
+{ 1,0.84934,0.83562,0.78836,0.70191,0.78836,0.83562,0.84934, },
+{ 1,0.96505,0.87366,0.83562,0.74391,0.83562,0.87366,0.96505, },
+{ 1,0.99,0.96505,0.84934,0.80368,0.84934,0.96505,0.99, } };
 
 //某一个棋局时某种颜色棋的获益
 double w(int col)
@@ -120,17 +121,13 @@ double w(int col)
 		for (j = 1; j <= 7; j++)
 			win += chsBoard[i][j] * weight[i][j];
 	win *= col;
-	if (chsBoard[0][1 + col] >= 25)
-		win += 20;
-	if (chsBoard[0][1 - col] >= 25)
-		win -= 20;
-	win += ((rand() % 3) / 10.0);
 	return win;
 }
 
 //返回电脑的最佳收益(tempCol为userCol时找最小，tempCol为computerCol时找最大）
 double search(int tempCol, int depth, double alpha, double beta)
 {
+	cnt++;
 	int i, j, k, l;//循环变量
 	if (depth > maxDepth)//边界条件
 		return w(-userCol);
@@ -138,7 +135,7 @@ double search(int tempCol, int depth, double alpha, double beta)
 	//---------------------------------------------------------
 	//卡时间，要超时就降低搜索深度
 	if (depth == maxDepth - 1 && maxDepth == 2)
-		if (clock() - start >= CLOCKS_PER_SEC * 0.995)
+		if (clock() - start >= CLOCKS_PER_SEC * 0.996)
 			maxDepth = 1;
 	if (depth == maxDepth - 1 && maxDepth == 3)
 		if (clock() - start >= CLOCKS_PER_SEC * 0.95)
@@ -286,7 +283,7 @@ void aiFindNextStep(int computerCol)
 	}
 	move(bestm, bestn, bestx, besty, computerCol);
 	cout << bestm - 1 << " " << bestn - 1 << " " << bestx - 1 << " " << besty - 1 << endl;
-	cout << chsBoard[0][0] << " " << chsBoard[0][2] << " " << cnt1 << " " << cnt2 << " " << maxDepth << " " << clock() * 1.0000 / CLOCKS_PER_SEC;
+	cout << chsBoard[0][0] << " " << chsBoard[0][2] << " " << cnt << " " << cnt1 << " " << cnt2 << " " << maxDepth << " " << (clock() - start) * 1.0000 / CLOCKS_PER_SEC;
 	return;
 }
 /*************************************************************************************************************************************/
@@ -345,14 +342,18 @@ int main()
 		userCol = -1;
 	//---------------------------------------------------------
 
-	//36个子之前用5步搜索
+	//36个子之前用6步搜索
 	if (chsBoard[0][0] + chsBoard[0][2] <= 36)
-		maxDepth = 3;
+		maxDepth = 4;
 	//44个子之后用8步搜索
-	if (chsBoard[0][0] + chsBoard[0][2] >= 44)
+	if (chsBoard[0][0] + chsBoard[0][2] >= 40)
 		maxDepth = 6;
+	//47个子之后用9步搜索
+	if (chsBoard[0][0] + chsBoard[0][2] >= 47)
+		maxDepth = 7;
 
 	//---------------------------------------------------------
+	start = clock();
 	if (userCol == 1)//玩家拿黑子
 		aiFindNextStep(-1);
 	else if (userCol == -1)//玩家拿白子
