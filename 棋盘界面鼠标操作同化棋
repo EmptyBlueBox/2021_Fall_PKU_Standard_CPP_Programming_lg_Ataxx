@@ -269,23 +269,25 @@ int menu()
 
 	system("cls");
 
-flagmenu: {};
 	cout << "请选择您的游戏方式" << endl;
 	cout << "1、单人游戏" << endl << "2、双人游戏" << endl << "3、读取存档" << endl << "4、退出游戏" << endl;
 
-	double userChoice;
-	cin >> userChoice;
+flagmenu:;
+	char userChoice;
+	userChoice = getchar();
 
 	string discard;
 	getline(cin, discard);//防止一次输入多个数字
 
-	if (userChoice != 1 && userChoice != 2 && userChoice != 3 && userChoice != 4)
+	if ((userChoice != '1' && userChoice != '2' && userChoice != '3' && userChoice != '4')||(!discard.empty()))
 	{
 		system("cls");
+		cout << "请选择您的游戏方式" << endl;
+		cout << "1、单人游戏" << endl << "2、双人游戏" << endl << "3、读取存档" << endl << "4、退出游戏" << endl << endl;
 		cout << "没有这种游戏方法哦" << endl << "请重新输入" << endl << endl;
 		goto flagmenu;
 	}
-	return int(userChoice);
+	return int(userChoice - '0');
 }
 
 //了解玩家想操作红棋还是黄棋
@@ -295,27 +297,29 @@ int getCol()
 
 	system("cls");
 
-flaggetcol: {};
 	cout << "那么你想操作红棋还是黄棋呢" << endl;
 	cout << "p.s.红棋先行" << endl;
 	cout << "1、红棋" << endl << "2、黄棋" << endl;
-
-	double temp;
-	cin >> temp;
+flaggetcol: {};
+	char temp;
+	temp = getchar();
 
 	string discard;
 	getline(cin, discard);//防止一次输入多个数字
 
-	if (temp != 1 && temp != 2)
+	if ((temp != '1' && temp != '2') || (!discard.empty()))
 	{
 		system("cls");
+		cout << "那么你想操作红棋还是黄棋呢" << endl;
+		cout << "p.s.红棋先行" << endl;
+		cout << "1、红棋" << endl << "2、黄棋" << endl << endl;
 		cout << "没有这种颜色的棋哦" << endl << "请重新输入" << endl << endl;
 		goto flaggetcol;
 	}
 
-	if (temp == 1)
+	if (temp == '1')
 		return 1;
-	else if (temp == 2)
+	else if (temp == '2')
 		return -1;
 }
 
@@ -349,7 +353,7 @@ flagSelect: {};
 		saveFile();
 		system("cls");
 		plot();
-		whoIsNext();
+		//whoIsNext();
 		cout << "游戏已保存" << endl;
 		goto flagSelect;
 	}
@@ -541,6 +545,14 @@ double search(int tempCol, int depth, double alpha, double beta)
 	if (depth > maxDepth)//边界条件
 		return w(-1 * userCol) - w(userCol);
 
+	//特判棋局终止
+	if (!judgeAll(tempCol))
+	{
+		if (!judgeAll(-tempCol))
+			return w(-userCol);
+		return search(-tempCol, depth + 1, alpha, beta);
+	}
+
 	double temp;
 	if (tempCol == -1 * userCol)//电脑选最大的
 	{
@@ -671,7 +683,16 @@ void aiFindNextStep(int computerCol)
 	move(bestm, bestn, bestx, besty, computerCol);
 	system("cls");
 	plot();
-	printf("电脑从(%d, %d)下到了(%d, %d)\n", bestn, 8 - bestm, besty, 8 - bestx);
+	//printf("电脑从(%d, %d)下到了(%d, %d)\n", bestn, 8 - bestm, besty, 8 - bestx);
+
+	if (computerCol == 1)
+	{
+		printf("    \033[41m电脑从(%d, %d)下到了(%d, %d)\033[0m\n", bestn, 8 - bestm, besty, 8 - bestx);
+	}
+	else if (computerCol == -1)
+	{
+		printf("    \033[43m\033[30m电脑从(%d, %d)下到了(%d, %d)\033[0m\n", bestn, 8 - bestm, besty, 8 - bestx);
+	}
 }
 /*************************************************************************************************************************************/
 //单人游戏
