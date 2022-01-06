@@ -208,6 +208,35 @@ void reload_last_step()
 		}
 	}
 }
+//重置棋盘
+void reset()
+{
+	memset(chsBoard, 0, sizeof(chsBoard));
+	memset(chess, 0, sizeof(chess));
+	memset(last_step_chsBoard, 0, sizeof(last_step_chsBoard));
+	memset(last_step_tempchess, 0, sizeof(last_step_tempchess));
+	col = 1;
+	chsBoard[1][1] = 1;
+	last_step_chsBoard[1][1] = 1;
+	chsBoard[7][7] = 1;
+	last_step_chsBoard[7][7] = 1;
+	chsBoard[1][7] = -1;
+	last_step_chsBoard[1][7] = -1;
+	chsBoard[7][1] = -1;
+	last_step_chsBoard[7][1] = -1;
+	chess[0][1][7] = true;
+	last_step_tempchess[0][1][7] = true;
+	chess[0][7][1] = true;
+	last_step_tempchess[0][7][1] = true;
+	chess[2][1][1] = true;
+	last_step_tempchess[2][1][1] = true;
+	chess[2][7][7] = true;
+	last_step_tempchess[2][7][7] = true;
+	chess[0][0][0] = 2;
+	last_step_tempchess[0][0][0] = 2;
+	chess[2][0][0] = 2;
+	last_step_tempchess[2][0][0] = 2;
+}
 /*************************************************************************************************************************************/
 //鼠标操作
 POINT p;
@@ -1015,6 +1044,7 @@ void singleMatch(int userCol)//col总是从1开始
 
 				save_last_step();
 				move(m, n, x, y, col);
+				plot();
 				col = 1;
 			}
 			else if(col == -1 && judgeAll(-1) == false)
@@ -1103,30 +1133,6 @@ int main()
 	SetConsoleMode(hStdin, mode);
 	//--------------------------------------------------------------
 	 hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-	//初始化棋盘
-	 {
-		 col = 1;
-		 chsBoard[1][1] = 1;
-		 last_step_chsBoard[1][1] = 1;
-		 chsBoard[7][7] = 1;
-		 last_step_chsBoard[7][7] = 1;
-		 chsBoard[1][7] = -1;
-		 last_step_chsBoard[1][7] = -1;
-		 chsBoard[7][1] = -1;
-		 last_step_chsBoard[7][1] = -1;
-		 chess[0][1][7] = true;
-		 last_step_tempchess[0][1][7] = true;
-		 chess[0][7][1] = true;
-		 last_step_tempchess[0][7][1] = true;
-		 chess[2][1][1] = true;
-		 last_step_tempchess[2][1][1] = true;
-		 chess[2][7][7] = true;
-		 last_step_tempchess[2][7][7] = true;
-		 chess[0][0][0] = 2;
-		 last_step_tempchess[0][0][0] = 2;
-		 chess[2][0][0] = 2;
-		 last_step_tempchess[2][0][0] = 2;
-	 }
 
 	int userChoice;//玩家的需求对应的变量
 flagMain: {};
@@ -1135,117 +1141,25 @@ flagMain: {};
 	if (userChoice == 1)
 	{
 		userCol = getCol();
-		//初始化棋盘,防止返回菜单再下棋不是新棋局
-	{
-		col = 1;
-		chsBoard[1][1] = 1;
-		last_step_chsBoard[1][1] = 1;
-		chsBoard[7][7] = 1;
-		last_step_chsBoard[7][7] = 1;
-		chsBoard[1][7] = -1;
-		last_step_chsBoard[1][7] = -1;
-		chsBoard[7][1] = -1;
-		last_step_chsBoard[7][1] = -1;
-		chess[0][1][7] = true;
-		last_step_tempchess[0][1][7] = true;
-		chess[0][7][1] = true;
-		last_step_tempchess[0][7][1] = true;
-		chess[2][1][1] = true;
-		last_step_tempchess[2][1][1] = true;
-		chess[2][7][7] = true;
-		last_step_tempchess[2][7][7] = true;
-		chess[0][0][0] = 2;
-		last_step_tempchess[0][0][0] = 2;
-		chess[2][0][0] = 2;
-		last_step_tempchess[2][0][0] = 2;
-	}
+		reset();//第一次开始新棋局
 ThreeToOne: {};
 		singleMatch(userCol);
 		if (flag_gotomenu == 1)
 		{
 			flag_gotomenu = 0;
-			memset(chsBoard, 0, sizeof(chsBoard));
-			memset(chess, 0, sizeof(chess));
-			memset(last_step_chsBoard, 0, sizeof(last_step_chsBoard));
-			memset(last_step_tempchess, 0, sizeof(last_step_tempchess));
-			chsBoard[1][1] = 1;
-			last_step_chsBoard[1][1] = 1;
-			chsBoard[7][7] = 1;
-			last_step_chsBoard[7][7] = 1;
-			chsBoard[1][7] = -1;
-			last_step_chsBoard[1][7] = -1;
-			chsBoard[7][1] = -1;
-			last_step_chsBoard[7][1] = -1;
-			chess[0][1][7] = true;
-			last_step_tempchess[0][1][7] = true;
-			chess[0][7][1] = true;
-			last_step_tempchess[0][7][1] = true;
-			chess[2][1][1] = true;
-			last_step_tempchess[2][1][1] = true;
-			chess[2][7][7] = true;
-			last_step_tempchess[2][7][7] = true;
-			chess[0][0][0] = 2;
-			last_step_tempchess[0][0][0] = 2;
-			chess[2][0][0] = 2;
-			last_step_tempchess[2][0][0] = 2;
+			reset();//第二次开始新棋局之后初始化棋盘,防止返回菜单再下棋不是新棋局
 			goto flagMain;
 		}
 	}
 	else if (userChoice == 2)
 	{
-	ThreeToTwo: {};
 		//初始化棋盘
-	{
-		col = 1;
-		chsBoard[1][1] = 1;
-		last_step_chsBoard[1][1] = 1;
-		chsBoard[7][7] = 1;
-		last_step_chsBoard[7][7] = 1;
-		chsBoard[1][7] = -1;
-		last_step_chsBoard[1][7] = -1;
-		chsBoard[7][1] = -1;
-		last_step_chsBoard[7][1] = -1;
-		chess[0][1][7] = true;
-		last_step_tempchess[0][1][7] = true;
-		chess[0][7][1] = true;
-		last_step_tempchess[0][7][1] = true;
-		chess[2][1][1] = true;
-		last_step_tempchess[2][1][1] = true;
-		chess[2][7][7] = true;
-		last_step_tempchess[2][7][7] = true;
-		chess[0][0][0] = 2;
-		last_step_tempchess[0][0][0] = 2;
-		chess[2][0][0] = 2;
-		last_step_tempchess[2][0][0] = 2;
-	}
+		reset();
+ThreeToTwo: {};
 		doubleMatch();
 		if (flag_gotomenu == 1)
 		{
-			flag_gotomenu = 0;
-			memset(chsBoard, 0, sizeof(chsBoard));
-			memset(chess, 0, sizeof(chess));
-			memset(last_step_chsBoard, 0, sizeof(last_step_chsBoard));
-			memset(last_step_tempchess, 0, sizeof(last_step_tempchess));
-			chsBoard[1][1] = 1;
-			last_step_chsBoard[1][1] = 1;
-			chsBoard[7][7] = 1;
-			last_step_chsBoard[7][7] = 1;
-			chsBoard[1][7] = -1;
-			last_step_chsBoard[1][7] = -1;
-			chsBoard[7][1] = -1;
-			last_step_chsBoard[7][1] = -1;
-			chess[0][1][7] = true;
-			last_step_tempchess[0][1][7] = true;
-			chess[0][7][1] = true;
-			last_step_tempchess[0][7][1] = true;
-			chess[2][1][1] = true;
-			last_step_tempchess[2][1][1] = true;
-			chess[2][7][7] = true;
-			last_step_tempchess[2][7][7] = true;
-			chess[0][0][0] = 2;
-			last_step_tempchess[0][0][0] = 2;
-			chess[2][0][0] = 2;
-			last_step_tempchess[2][0][0] = 2;
+			reset();
 			goto flagMain;
 		}
 	}
@@ -1294,7 +1208,7 @@ ThreeToOne: {};
 		cin >> temp;
 		if (temp == 1)
 		{
-			cout << "游戏已退出" << endl << "-------------------------------------";
+			cout << "游戏已退出" << endl << "-----------------------------------";
 			return 0;
 		}
 		else if (temp == 2)
