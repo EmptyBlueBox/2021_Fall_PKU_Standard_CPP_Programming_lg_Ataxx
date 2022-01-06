@@ -7,19 +7,17 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <windows.h>
-
-//#define KEY_DOWN(VK_NONAME) ((GetAsyncKeyState(VK_NONAME) & 0x8000) ? 1:0)  //用来检测按键的点击事件
 using namespace std;
 HANDLE hOutput;
 HWND h = GetForegroundWindow();
 CONSOLE_FONT_INFO Char;
 //所有输出函数之前都要有清屏函数
-int chsBoard[8][8] = { 0 };//黑棋先行，黑棋1，白棋-1
-int chess[3][8][8] = { 0 };//黑棋2，白棋1
-int tempchsBoard[10][8][8] = { 0 };//黑棋先行，黑棋1，白棋-1
-int tempchess[10][3][8][8] = { 0 };//黑棋2，白棋1
-int last_step_chsBoard[8][8] = { 0 };//黑棋先行，黑棋1，白棋-1
-int last_step_tempchess[3][8][8] = { 0 };//黑棋2，白棋1
+int chsBoard[8][8] = { {0} };//黑棋先行，黑棋1，白棋-1
+int chess[3][8][8] = { {{0}} };//黑棋2，白棋1
+int tempchsBoard[10][8][8] = { {{0}} };//黑棋先行，黑棋1，白棋-1
+int tempchess[10][3][8][8] = { {{{0}}} };//黑棋2，白棋1
+int last_step_chsBoard[8][8] = { {0} };//黑棋先行，黑棋1，白棋-1
+int last_step_tempchess[3][8][8] = { {{0}} };//黑棋2，白棋1
 int col = 1;
 int userCol;
 int flag_gotomenu = 0;
