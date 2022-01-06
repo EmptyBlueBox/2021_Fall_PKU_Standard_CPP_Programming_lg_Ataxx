@@ -924,7 +924,6 @@ void singleMatch(int userCol)//col总是从1开始
 				whoIsNext();
 
 				temp = select(userCol);
-				whoIsNext();
 				m = temp / 10;
 				n = temp % 10;
 				if (n == 0)
@@ -1106,6 +1105,7 @@ int main()
 	 hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	//初始化棋盘
 	 {
+		 col = 1;
 		 chsBoard[1][1] = 1;
 		 last_step_chsBoard[1][1] = 1;
 		 chsBoard[7][7] = 1;
@@ -1135,7 +1135,31 @@ flagMain: {};
 	if (userChoice == 1)
 	{
 		userCol = getCol();
-	ThreeToOne: {};
+		//初始化棋盘,防止返回菜单再下棋不是新棋局
+	{
+		col = 1;
+		chsBoard[1][1] = 1;
+		last_step_chsBoard[1][1] = 1;
+		chsBoard[7][7] = 1;
+		last_step_chsBoard[7][7] = 1;
+		chsBoard[1][7] = -1;
+		last_step_chsBoard[1][7] = -1;
+		chsBoard[7][1] = -1;
+		last_step_chsBoard[7][1] = -1;
+		chess[0][1][7] = true;
+		last_step_tempchess[0][1][7] = true;
+		chess[0][7][1] = true;
+		last_step_tempchess[0][7][1] = true;
+		chess[2][1][1] = true;
+		last_step_tempchess[2][1][1] = true;
+		chess[2][7][7] = true;
+		last_step_tempchess[2][7][7] = true;
+		chess[0][0][0] = 2;
+		last_step_tempchess[0][0][0] = 2;
+		chess[2][0][0] = 2;
+		last_step_tempchess[2][0][0] = 2;
+	}
+ThreeToOne: {};
 		singleMatch(userCol);
 		if (flag_gotomenu == 1)
 		{
@@ -1170,6 +1194,30 @@ flagMain: {};
 	else if (userChoice == 2)
 	{
 	ThreeToTwo: {};
+		//初始化棋盘
+	{
+		col = 1;
+		chsBoard[1][1] = 1;
+		last_step_chsBoard[1][1] = 1;
+		chsBoard[7][7] = 1;
+		last_step_chsBoard[7][7] = 1;
+		chsBoard[1][7] = -1;
+		last_step_chsBoard[1][7] = -1;
+		chsBoard[7][1] = -1;
+		last_step_chsBoard[7][1] = -1;
+		chess[0][1][7] = true;
+		last_step_tempchess[0][1][7] = true;
+		chess[0][7][1] = true;
+		last_step_tempchess[0][7][1] = true;
+		chess[2][1][1] = true;
+		last_step_tempchess[2][1][1] = true;
+		chess[2][7][7] = true;
+		last_step_tempchess[2][7][7] = true;
+		chess[0][0][0] = 2;
+		last_step_tempchess[0][0][0] = 2;
+		chess[2][0][0] = 2;
+		last_step_tempchess[2][0][0] = 2;
+	}
 		doubleMatch();
 		if (flag_gotomenu == 1)
 		{
@@ -1246,7 +1294,7 @@ flagMain: {};
 		cin >> temp;
 		if (temp == 1)
 		{
-			cout << "游戏已退出" << endl << "------------------------------------------------------------------------------------";
+			cout << "游戏已退出" << endl << "-------------------------------------";
 			return 0;
 		}
 		else if (temp == 2)
